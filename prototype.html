@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>职场知识库管理</title>
+  <link rel="stylesheet" href="./prototype/prototype.css">
+</head>
+<body>
+  <!-- 应用壳层：顶部导航 + 侧栏 + 业务内容 -->
+  <div class="ui-shell ui-overlay-host" id="uiShell">
+
+    <!-- slot: navigation.app-header -->
+    <header class="ui-header" id="uiHeader">
+      <div class="ui-brand" id="uiBrand">
+        <span class="ui-brand-mark" aria-hidden="true">知</span>
+        <span>职场知识库</span>
+      </div>
+      <nav class="ui-topnav" id="uiTopnav" aria-label="一级导航">
+        <a href="#" aria-current="page">知识库</a>
+        <a href="#">我的收藏</a>
+        <a href="#">团队空间</a>
+        <a href="#">回收站</a>
+      </nav>
+      <div class="ui-header-actions" id="uiHeaderActions">
+        <button class="ui-button ui-button--icon" type="button" aria-label="消息通知">🔔</button>
+        <span class="ui-avatar ui-avatar--sm" aria-label="当前用户"><span class="ui-avatar-text">我</span></span>
+      </div>
+    </header>
+
+    <div class="ui-shell-body" id="uiShellBody">
+      <!-- slot: navigation.sider-menu（以分类树承载知识库分类导航） -->
+      <aside class="ui-sider" id="uiSider">
+        <nav class="ui-menu" id="uiSiderMenu" aria-label="侧栏菜单">
+          <button class="ui-menu-item is-active" type="button" aria-current="page" data-cat="all">
+            <span aria-hidden="true">▤</span><span>全部文档</span>
+          </button>
+        </nav>
+        <div class="ui-sider-divider" aria-hidden="true"></div>
+        <!-- slot: navigation.tree -->
+        <ul class="ui-tree" id="uiKbTree" aria-label="知识库分类">
+          <li class="ui-tree-node">
+            <div class="ui-tree-row">
+              <button class="ui-tree-toggle" type="button" aria-label="折叠分组" aria-expanded="true" aria-controls="uiTreeGroupRule">⌄</button>
+              <span>规章制度</span>
+            </div>
+            <ul class="ui-tree-children" id="uiTreeGroupRule">
+              <li><button class="ui-tree-leaf" type="button" data-cat="规章制度">人事制度</button></li>
+              <li><button class="ui-tree-leaf" type="button" data-cat="规章制度">财务制度</button></li>
+            </ul>
+          </li>
+          <li class="ui-tree-node">
+            <div class="ui-tree-row">
+              <button class="ui-tree-toggle" type="button" aria-label="折叠分组" aria-expanded="true" aria-controls="uiTreeGroupTrain">⌄</button>
+              <span>培训资料</span>
+            </div>
+            <ul class="ui-tree-children" id="uiTreeGroupTrain">
+              <li><button class="ui-tree-leaf" type="button" data-cat="培训资料">新人培训</button></li>
+              <li><button class="ui-tree-leaf" type="button" data-cat="培训资料">岗位认证</button></li>
+            </ul>
+          </li>
+          <li class="ui-tree-node">
+            <div class="ui-tree-row">
+              <button class="ui-tree-toggle" type="button" aria-label="折叠分组" aria-expanded="true" aria-controls="uiTreeGroupProj">⌄</button>
+              <span>项目文档</span>
+            </div>
+            <ul class="ui-tree-children" id="uiTreeGroupProj">
+              <li><button class="ui-tree-leaf" type="button" data-cat="项目文档">需求评审</button></li>
+              <li><button class="ui-tree-leaf" type="button" data-cat="项目文档">周报模板</button></li>
+            </ul>
+          </li>
+          <li class="ui-tree-node">
+            <div class="ui-tree-row">
+              <button class="ui-tree-toggle" type="button" aria-label="折叠分组" aria-expanded="false" aria-controls="uiTreeGroupProd">⌄</button>
+              <span>产品资料</span>
+            </div>
+            <ul class="ui-tree-children" id="uiTreeGroupProd" hidden>
+              <li><button class="ui-tree-leaf" type="button" data-cat="产品资料">VI 规范</button></li>
+            </ul>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- 业务内容 -->
+      <main class="ui-content" id="uiContent">
+        <article class="ui-content-card" id="uiContentCard">
+
+          <!-- slot: pattern.page-header -->
+          <div class="ui-page-title" id="uiPageTitle">
+            <h1>知识库管理</h1>
+            <div class="ui-button-row">
+              <button class="ui-button" type="button" id="uiToolbarNewCat">新建分类</button>
+              <button class="ui-button" type="button" id="uiToolbarExport">导出清单</button>
+            </div>
+          </div>
+
+          <!-- 知识库概览统计 -->
+          <section class="ui-stats" id="uiStats" aria-label="知识库概览">
+            <section class="ui-statistic"><div class="ui-statistic-title">文档总数</div><div class="ui-statistic-value-row"><output class="ui-statistic-value" id="uiStatTotal">0</output><span class="ui-statistic-trend" data-trend="up">↑</span></div></section>
+            <section class="ui-statistic"><div class="ui-statistic-title">今日新增</div><div class="ui-statistic-value-row"><output class="ui-statistic-value">12</output><span class="ui-statistic-trend" data-trend="up">↑</span></div></section>
+            <section class="ui-statistic"><div class="ui-statistic-title">存储用量</div><div class="ui-statistic-value-row"><output class="ui-statistic-value">3.2 GB</output></div></section>
+            <section class="ui-statistic" data-status="warning"><div class="ui-statistic-title">待审核</div><div class="ui-statistic-value-row"><output class="ui-statistic-value" id="uiStatPending">0</output></div></section>
+          </section>
+
+          <!-- slot: pattern.filter-table -->
+          <section id="uiListWorkspace">
+            <!-- slot: data.filter-bar -->
+            <section class="ui-filter" id="uiFilter" aria-label="筛选条件">
+              <label class="ui-field ui-field--inline">
+                <span class="ui-field-label">关键词</span>
+                <input class="ui-input" id="uiFilterKeyword" type="search" placeholder="搜索文档名称 / 创建人" aria-label="关键词">
+              </label>
+              <label class="ui-field ui-field--inline">
+                <span class="ui-field-label">文档类型</span>
+                <div class="ui-select" id="uiFilterType" data-native="1">
+                  <select class="ui-select-native" aria-label="文档类型">
+                    <option value="all">全部类型</option>
+                    <option value="PDF">PDF</option>
+                    <option value="Word">Word</option>
+                    <option value="Excel">Excel</option>
+                    <option value="PPT">PPT</option>
+                    <option value="图片">图片</option>
+                    <option value="视频">视频</option>
+                  </select>
+                </div>
+              </label>
+              <label class="ui-field ui-field--inline">
+                <span class="ui-field-label">状态</span>
+                <div class="ui-select" id="uiFilterStatus" data-native="1">
+                  <select class="ui-select-native" aria-label="状态">
+                    <option value="all">全部状态</option>
+                    <option value="已发布">已发布</option>
+                    <option value="草稿">草稿</option>
+                    <option value="待审核">待审核</option>
+                  </select>
+                </div>
+              </label>
+              <div class="ui-button-row ui-filter-actions">
+                <button class="ui-button ui-button--primary" type="button" id="uiFilterSearchBtn">查询</button>
+                <button class="ui-button" type="button" id="uiFilterResetBtn">重置</button>
+              </div>
+            </section>
+
+            <!-- slot: data.toolbar -->
+            <div class="ui-toolbar" id="uiToolbar">
+              <div class="ui-toolbar-group" id="uiToolbarLeft">
+                <button class="ui-button ui-button--primary" type="button" id="uiToolbarUpload" data-ui-interactive>上传文档</button>
+                <button class="ui-button" type="button" id="uiToolbarBatchDelete">批量删除</button>
+              </div>
+              <div class="ui-toolbar-group" id="uiToolbarRight">
+                <span class="ui-toolbar-hint" id="uiSelectionHint">已选 0 项</span>
+                <button class="ui-button" type="button" id="uiToolbarRefresh">刷新</button>
+              </div>
+            </div>
+
+            <!-- slot: data.data-table -->
+            <div class="ui-table-wrap" id="uiTableWrap">
+              <table class="ui-table ui-table-data" id="uiDataTable">
+                <thead>
+                  <tr>
+                    <th class="ui-table-selection"><input type="checkbox" data-selection-all aria-label="全选当前页"></th>
+                    <th>文档名称</th>
+                    <th>类型</th>
+                    <th>分类</th>
+                    <th>创建人</th>
+                    <th>更新时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="uiTableBody"><!-- 由 prototype.js 渲染 --></tbody>
+              </table>
+              <div class="ui-table-state" id="uiTableEmpty" hidden>
+                <div><div class="ui-empty-icon" aria-hidden="true">□</div><div>没有符合条件的文档</div></div>
+              </div>
+            </div>
+
+            <!-- optional: data.pagination -->
+            <div class="ui-pagination" id="uiPagination" aria-label="分页">
+              <span class="ui-pagination-info" id="uiPaginationInfo">共 0 条</span>
+              <div class="ui-button-row">
+                <button class="ui-button ui-button--icon" type="button" id="uiPagePrev" aria-label="上一页">‹</button>
+                <span class="ui-pagination-page" id="uiPageCurrent">1 / 1</span>
+                <button class="ui-button ui-button--icon" type="button" id="uiPageNext" aria-label="下一页">›</button>
+              </div>
+            </div>
+          </section>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- 上传文档 Modal（标注连线绑定内层面板 id uiUploadModalPanel） -->
+  <div class="ui-overlay ui-modal-overlay" id="uiUploadModal" role="dialog" aria-modal="true" aria-labelledby="uiUploadModalTitle" aria-hidden="true" hidden>
+    <div class="ui-modal" id="uiUploadModalPanel">
+      <div class="ui-layer-head">
+        <strong id="uiUploadModalTitle">上传文档</strong>
+        <button class="ui-button ui-button--icon" id="uiUploadModalClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="ui-layer-body">
+        <div class="ui-upload ui-upload--dragger" id="uiUpload">
+          <div class="ui-upload-dragger" id="uiUploadDrop">
+            <div class="ui-upload-drop-icon" aria-hidden="true">⤓</div>
+            <div>拖拽文件到此处，或 <button class="ui-link" type="button" id="uiUploadPick">点击选择</button></div>
+            <input type="file" id="uiUploadInput" multiple hidden>
+          </div>
+          <ul class="ui-upload-list" id="uiUploadList" role="list"></ul>
+        </div>
+        <div class="ui-form-grid">
+          <label class="ui-field"><span class="ui-field-label">文档名称</span><input class="ui-input" id="uiUploadName" placeholder="留空则使用文件名"></label>
+          <label class="ui-field"><span class="ui-field-label">分类</span>
+            <div class="ui-select" id="uiUploadCat" data-native="1">
+              <select class="ui-select-native" aria-label="分类">
+                <option value="规章制度">规章制度</option>
+                <option value="培训资料">培训资料</option>
+                <option value="项目文档">项目文档</option>
+                <option value="产品资料">产品资料</option>
+                <option value="团队空间">团队空间</option>
+              </select>
+            </div>
+          </label>
+          <label class="ui-field ui-field--full"><span class="ui-field-label">标签</span><input class="ui-input" id="uiUploadTags" placeholder="多个标签用逗号分隔"></label>
+          <label class="ui-field ui-field--full"><span class="ui-field-label">描述</span><textarea class="ui-textarea" id="uiUploadDesc" rows="3" placeholder="补充文档说明（可选）"></textarea></label>
+        </div>
+      </div>
+      <div class="ui-layer-foot">
+        <button class="ui-button" id="uiUploadModalCancel" type="button">取消</button>
+        <button class="ui-button ui-button--primary" id="uiUploadModalConfirm" type="button">确认上传</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文档预览 Drawer（标注连线绑定内层面板 id uiPreviewDrawerPanel） -->
+  <div class="ui-overlay ui-drawer-overlay" id="uiPreviewDrawer" role="dialog" aria-modal="true" aria-labelledby="uiPreviewTitle" aria-hidden="true" hidden>
+    <aside class="ui-drawer" id="uiPreviewDrawerPanel">
+      <div class="ui-layer-head">
+        <strong id="uiPreviewTitle">文档预览</strong>
+        <button class="ui-button ui-button--icon" id="uiPreviewClose" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="ui-layer-body" id="uiPreviewBody">
+        <div class="ui-preview-thumb" id="uiPreviewThumb" aria-hidden="true">📄</div>
+        <section class="ui-descriptions" id="uiPreviewDesc">
+          <dl class="ui-descriptions-data">
+            <div class="ui-descriptions-item"><dt>文档名称</dt><dd id="uiPreviewName">—</dd></div>
+            <div class="ui-descriptions-item"><dt>类型</dt><dd id="uiPreviewType">—</dd></div>
+            <div class="ui-descriptions-item"><dt>大小</dt><dd id="uiPreviewSize">—</dd></div>
+            <div class="ui-descriptions-item"><dt>分类</dt><dd id="uiPreviewCat">—</dd></div>
+            <div class="ui-descriptions-item"><dt>创建人</dt><dd id="uiPreviewOwner">—</dd></div>
+            <div class="ui-descriptions-item"><dt>状态</dt><dd id="uiPreviewStatus">—</dd></div>
+            <div class="ui-descriptions-item ui-descriptions-item--full"><dt>更新时间</dt><dd id="uiPreviewUpdated">—</dd></div>
+            <div class="ui-descriptions-item ui-descriptions-item--full"><dt>描述</dt><dd id="uiPreviewNote">—</dd></div>
+          </dl>
+        </section>
+        <div class="ui-preview-block" id="uiPreviewContent">文档内容在线预览区（演示占位）。</div>
+        <div class="ui-button-row ui-preview-actions">
+          <button class="ui-button ui-button--primary" type="button" id="uiPreviewDownload">下载文档</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 全局 Toast 区 -->
+  <div class="ui-toast-region" id="uiToastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./prototype/notes.snapshot.js"></script>
+  <script src="./prototype/display-mode.js"></script>
+  <script src="./prototype/state.js"></script>
+  <script src="./prototype/model.js"></script>
+  <script src="./prototype/viewer.js"></script>
+  <script src="./prototype/prototype.js"></script>
+</body>
+</html>
